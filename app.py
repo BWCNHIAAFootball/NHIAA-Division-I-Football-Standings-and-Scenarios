@@ -7,19 +7,37 @@ import csv
 # Set Streamlit Page Configuration
 st.set_page_config(page_title="NHIAA D1 Playoff Simulator", layout="wide")
 
-st.title("🏈 NHIAA Division 1 Football Playoff & Tiebreaker Simulator")
-st.markdown("Simulate remaining regular season game outcomes to dynamically compute standings, divisional rating points, tiebreakers, and 1–13 playoff seeding in real-time.")
+# Custom CSS to force all dataframe table headers to be bold and centered
+st.markdown(
+    """
+    <style>
+    /* Target Streamlit dataframe header cells */
+    [data-testid="stDataFrame"] th, 
+    [data-testid="stTable"] th,
+    div[data-testid="stDataFrame"] div[role="columnheader"] {
+        text-align: center !important;
+        font-weight: 800 !important;
+        color: #FFFFFF !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown("# 🏈 NHIAA Division I Football Standings")
+st.markdown("### Playoff Simulator")
+st.markdown("Simulate remaining regular season game outcomes to dynamically compute standings, conference rating points, tiebreakers, and 1–13 playoff seeding in real-time.")
 
 # ---------------------------------------------------------
-# 1. Team & Division Definitions
+# 1. Team & Conference Definitions
 # ---------------------------------------------------------
-DIVISIONS = {
+CONFERENCES = {
     'East': ['Portsmouth-Oyster River', 'Winnacunnet', 'Manchester Memorial', 'Exeter', 'Spaulding', 'Dover', 'Timberlane'],
     'Central': ['Pinkerton', 'Windham', 'Londonderry', 'Concord', 'Manchester Central', 'Salem', 'Alvirne'],
     'West': ['Bishop Guertin', 'Bedford', 'Merrimack', 'Nashua North', 'Nashua South', 'Goffstown', 'Keene']
 }
 
-TEAM_TO_DIV = {team: div for div, teams in DIVISIONS.items() for team in teams}
+TEAM_TO_CONF = {team: conf for conf, teams in CONFERENCES.items() for team in teams}
 
 NAME_MAP = {
     'Central': 'Manchester Central', 'Manchester Central': 'Manchester Central',
@@ -41,14 +59,8 @@ def normalize_name(name):
     cleaned = str(name).strip()
     return NAME_MAP.get(cleaned, cleaned)
 
-EXCLUDED_OPPONENTS = [
-    'Central Catholic', 'Bonny Eagle', 'South Portland', 'Thornton', 
-    'Westerly', 'Dracut', 'Malden Catholic', 'Haverhill', 'Noble', 
-    'Amesbury', 'Andover', 'BYE'
-]
-
 # ---------------------------------------------------------
-# 2. CSV Parser
+# 2. Comprehensive CSV Parser (Handles NCL / NCW Flags)
 # ---------------------------------------------------------
 @st.cache_data
 def parse_schedule_csv():
@@ -63,162 +75,246 @@ def parse_schedule_csv():
             
             col0 = str(row[0]).strip() if row[0] else ''
             
+            # Team header detection
             if col0 and not col0.startswith('Week') and col0 not in ['East', 'Central', 'West']:
                 current_team = normalize_name(col0)
             
+            # Weekly Game Row Parsing
             elif col0.startswith('Week'):
-                opp_norm = normalize_name(row[2]) if len(row) > 2 else None
-                is_div_flag = str(row[3]).strip() if len(row) > 3 else ''
+                location = str(row[1]).strip() if len(row) > 1 and row[1] else 'vs'
+                opp_raw = row[2] if len(row) > 2 else ''
+                opp_norm = normalize_name(opp_raw) if opp_raw else ''
+                is_conf_flag = str(row[3]).strip() if len(row) > 3 else ''
                 
                 raw_res = str(row[4]).strip().upper() if len(row) > 4 else ''
-                res = raw_res if raw_res in ['W', 'L'] else None
                 
-                if opp_norm and opp_norm not in EXCLUDED_OPPONENTS and current_team in TEAM_TO_DIV:
+                # Check for NCL (Non-Conference Loss) and NCW (Non-Conference Win)
+                is_ncl = raw_res == 'NCL'
+                is_ncw = raw_res == 'NCW'
+                
+                if is_ncl:
+                    res = 'L'
+                elif is_ncw:
+                    res = 'W'
+                elif raw_res in ['W', 'L']:
+                    res = raw_res
+                else:
+                    res = None
+                
+                pf = str(row[5]).strip() if len(row) > 5 and row[5] else '-'
+                pa = str(row[7]).strip() if len(row) > 7 and row[7] else '-'
+                
+                if current_team in TEAM_TO_CONF and opp_raw:
+                    is_bye = opp_raw.upper() == 'BYE'
+                    
+                    # NCL and NCW games do NOT count toward NHIAA D1 standings or GP
+                    is_d1_opponent = (opp_norm in TEAM_TO_CONF) and not is_ncl and not is_ncw
+                    
+                    if is_bye:
+                        conf_status = 'N/A'
+                    elif is_ncl or is_ncw:
+                        conf_status = 'Out of State'
+                    elif is_d1_opponent:
+                        conf_status = 'Yes' if is_conf_flag == 'Yes' else 'No'
+                    else:
+                        conf_status = 'Out of State'
+                    
                     games.append({
                         'Team': current_team,
                         'Week': col0,
-                        'Opponent': opp_norm,
-                        'IsDiv': is_div_flag,
-                        'Result': res
+                        'Location': '-' if is_bye else ('Away' if location == 'at' else 'Home'),
+                        'Opponent': opp_raw if is_bye else (opp_norm if (opp_norm in TEAM_TO_CONF) else opp_raw),
+                        'IsConf': conf_status,
+                        'IsD1Opponent': is_d1_opponent,
+                        'IsBye': is_bye,
+                        'IsNCL': is_ncl,
+                        'IsNCW': is_ncw,
+                        'Result': res,
+                        'PF': pf,
+                        'PA': pa
                     })
                     
     return pd.DataFrame(games)
 
+games_df = parse_schedule_csv()
+
 # ---------------------------------------------------------
-# 3. Sidebar: What-If Game Simulator & Reset Control
+# 3. Sidebar: Game Simulator Sandbox & Mode Toggle
 # ---------------------------------------------------------
 st.sidebar.header("⚙️ Game Simulator Sandbox")
 
-games_df = parse_schedule_csv()
-unplayed_df = games_df[games_df['Result'].isna()].copy()
+# Simulation Mode Radio Select
+sim_mode = st.sidebar.radio(
+    "Simulation Mode:",
+    options=["Predictor Mode", "What-If Mode"]
+)
 
-unique_fixtures = []
+# Inline mode descriptions displayed directly next to/underneath controls
+if sim_mode == "Predictor Mode":
+    st.sidebar.info("🔮 **Predictor Mode:** Select projected winners for remaining unplayed regular season games only.")
+else:
+    st.sidebar.info("🔀 **What-If Mode:** Allows manual overrides for ALL regular season games, including already completed matchups.")
+
+st.sidebar.markdown("---")
+
+# Build unique weekly fixtures from CSV (D1 Opponents only for standings rating calculations)
+all_fixtures = []
 seen_fixtures = set()
 
-for _, row in unplayed_df.iterrows():
-    pair = tuple(sorted([row['Team'], row['Opponent']]))
-    if pair not in seen_fixtures:
-        seen_fixtures.add(pair)
-        unique_fixtures.append((row['Week'], row['Team'], row['Opponent']))
+for _, row in games_df[games_df['IsD1Opponent']].iterrows():
+    week = row['Week']
+    team1 = row['Team']
+    team2 = row['Opponent']
+    pair = tuple(sorted([team1, team2]))
+    fixture_key = (week, pair)
+    
+    if fixture_key not in seen_fixtures:
+        seen_fixtures.add(fixture_key)
+        
+        res = row['Result']
+        actual_res = res if pd.notna(res) and str(res).strip().upper() in ['W', 'L'] else None
+        
+        all_fixtures.append({
+            'Week': week,
+            'Team1': team1,
+            'Team2': team2,
+            'ActualResult': actual_res  # 'W', 'L', or None
+        })
 
+# Filter active fixtures based on selected mode
+if sim_mode == "Predictor Mode":
+    active_fixtures = [f for f in all_fixtures if pd.isna(f['ActualResult']) or f['ActualResult'] is None]
+    # Clean session state for completed games when in Predictor Mode
+    for f in all_fixtures:
+        if pd.notna(f['ActualResult']) and f['ActualResult'] in ['W', 'L']:
+            key = f"sim_{f['Week']}_{f['Team1']}_{f['Team2']}"
+            if key in st.session_state:
+                del st.session_state[key]
+else:  # What-If Mode
+    active_fixtures = all_fixtures
+
+# Reset Button Logic
 if st.sidebar.button("🔄 Reset All Results", use_container_width=True):
-    for week, team1, team2 in unique_fixtures:
-        key = f"sim_{week}_{team1}_{team2}"
+    for f in active_fixtures:
+        key = f"sim_{f['Week']}_{f['Team1']}_{f['Team2']}"
         if key in st.session_state:
-            st.session_state[key] = "Actual/TBD"
+            if sim_mode == "What-If Mode" and pd.notna(f['ActualResult']) and f['ActualResult'] in ['W', 'L']:
+                actual_winner = f['Team1'] if f['ActualResult'] == 'W' else f['Team2']
+                st.session_state[key] = f"{actual_winner} Win"
+            else:
+                st.session_state[key] = "Actual/TBD"
     st.rerun()
 
 simulated_outcomes = {}
 
-if len(unique_fixtures) == 0:
+if len(active_fixtures) == 0:
     st.sidebar.success("🎉 All regular season games have been completed!")
 else:
-    st.sidebar.markdown("Pick winners for remaining unplayed games:")
-    weeks = sorted(list(set(w for w, _, _ in unique_fixtures)))
+    weeks = sorted(list(set(f['Week'] for f in active_fixtures)))
     
     for week in weeks:
         st.sidebar.subheader(f"📅 {week}")
-        week_fixtures = [f for f in unique_fixtures if f[0] == week]
+        week_fixtures = [f for f in active_fixtures if f['Week'] == week]
         
-        for w, team1, team2 in week_fixtures:
-            key = f"sim_{w}_{team1}_{team2}"
+        for f in week_fixtures:
+            team1, team2 = f['Team1'], f['Team2']
+            key = f"sim_{week}_{team1}_{team2}"
+            pair = tuple(sorted([team1, team2]))
+            
+            # Initialize default selectbox values
+            if key not in st.session_state:
+                if sim_mode == "What-If Mode" and pd.notna(f['ActualResult']) and f['ActualResult'] in ['W', 'L']:
+                    actual_winner = team1 if f['ActualResult'] == 'W' else team2
+                    st.session_state[key] = f"{actual_winner} Win"
+                else:
+                    st.session_state[key] = "Actual/TBD"
+            
             choice = st.sidebar.selectbox(
                 f"{team1} vs {team2}",
                 options=["Actual/TBD", f"{team1} Win", f"{team2} Win"],
                 key=key
             )
+            
             if choice == f"{team1} Win":
-                simulated_outcomes[(team1, team2)] = team1
+                simulated_outcomes[(week, pair)] = team1
             elif choice == f"{team2} Win":
-                simulated_outcomes[(team1, team2)] = team2
+                simulated_outcomes[(week, pair)] = team2
             else:
-                simulated_outcomes[(team1, team2)] = None
+                simulated_outcomes[(week, pair)] = None
 
 # ---------------------------------------------------------
 # 4. Calculation Engine
 # ---------------------------------------------------------
-teams_list = list(TEAM_TO_DIV.keys())
+teams_list = list(TEAM_TO_CONF.keys())
 
 all_victories = {t: [] for t in teams_list}
-div_victories = {t: [] for t in teams_list}
+conf_victories = {t: [] for t in teams_list}
 
 standings_data = {
     t: {
-        'Division': TEAM_TO_DIV[t], 
-        'W': 0, 'L': 0, 'GP': 0, 
-        'Div_W': 0, 'Div_L': 0, 'Div_GP': 0,
+        'Conference': TEAM_TO_CONF[t], 
+        'Wins': 0, 'Losses': 0, 'GP': 0, 
+        'Conf. Wins': 0, 'Conf. Losses': 0, 'Conf_GP': 0,
         'H2H_Wins': {other: 0 for other in teams_list}
     }
     for t in teams_list
 }
 
-played_games = games_df[games_df['Result'].isin(['W', 'L'])]
-
-for _, row in played_games.iterrows():
+# Tally Wins, Losses, and Head-to-Head Record (Only D1 standings games count)
+for _, row in games_df[games_df['IsD1Opponent']].iterrows():
     t = row['Team']
     opp = row['Opponent']
-    is_div = TEAM_TO_DIV.get(t) == TEAM_TO_DIV.get(opp)
+    week = row['Week']
+    pair = tuple(sorted([t, opp]))
+    is_conf = TEAM_TO_CONF.get(t) == TEAM_TO_CONF.get(opp)
     
-    if t in standings_data:
-        standings_data[t]['GP'] += 1
-        if is_div:
-            standings_data[t]['Div_GP'] += 1
-            
-        if row['Result'] == 'W':
-            standings_data[t]['W'] += 1
-            standings_data[t]['H2H_Wins'][opp] += 1
-            all_victories[t].append(opp)
-            if is_div:
-                standings_data[t]['Div_W'] += 1
-                div_victories[t].append(opp)
-        elif row['Result'] == 'L':
-            standings_data[t]['L'] += 1
-            if is_div:
-                standings_data[t]['Div_L'] += 1
-
-for (t1, t2), winner in simulated_outcomes.items():
-    if winner is not None:
-        loser = t2 if winner == t1 else t1
-        is_div = TEAM_TO_DIV.get(winner) == TEAM_TO_DIV.get(loser)
+    # Check for active simulation override
+    sim_winner = simulated_outcomes.get((week, pair), None)
+    
+    if sim_winner is not None:
+        effective_res = 'W' if sim_winner == t else 'L'
+    else:
+        effective_res = row['Result'] if pd.notna(row['Result']) else None
         
-        if winner in standings_data:
-            standings_data[winner]['GP'] += 1
-            standings_data[winner]['W'] += 1
-            standings_data[winner]['H2H_Wins'][loser] += 1
-            all_victories[winner].append(loser)
-            if is_div:
-                standings_data[winner]['Div_GP'] += 1
-                standings_data[winner]['Div_W'] += 1
-                div_victories[winner].append(loser)
+    if effective_res in ['W', 'L']:
+        if t in standings_data:
+            standings_data[t]['GP'] += 1
+            if is_conf:
+                standings_data[t]['Conf_GP'] += 1
                 
-        if loser in standings_data:
-            standings_data[loser]['GP'] += 1
-            standings_data[loser]['L'] += 1
-            if is_div:
-                standings_data[loser]['Div_GP'] += 1
-                standings_data[loser]['Div_L'] += 1
+            if effective_res == 'W':
+                standings_data[t]['Wins'] += 1
+                standings_data[t]['H2H_Wins'][opp] += 1
+                all_victories[t].append(opp)
+                if is_conf:
+                    standings_data[t]['Conf. Wins'] += 1
+                    conf_victories[t].append(opp)
+            elif effective_res == 'L':
+                standings_data[t]['Losses'] += 1
+                if is_conf:
+                    standings_data[t]['Conf. Losses'] += 1
 
-win_counts = {t: standings_data[t]['W'] for t in teams_list}
+# Calculate Opponent-Value Rating Points (Base 10 + 2 per Opponent Win)
+win_counts = {t: standings_data[t]['Wins'] for t in teams_list}
 overall_points = {}
-div_points = {}
+conf_points = {}
 
 for t in teams_list:
     tot_pts = sum(10.0 + (2.0 * win_counts.get(opp, 0)) for opp in all_victories[t])
     overall_points[t] = tot_pts
     
-    d_pts = sum(10.0 + (2.0 * win_counts.get(opp, 0)) for opp in div_victories[t])
-    div_points[t] = d_pts
+    c_pts = sum(10.0 + (2.0 * win_counts.get(opp, 0)) for opp in conf_victories[t])
+    conf_points[t] = c_pts
 
 df_stand = pd.DataFrame.from_dict(standings_data, orient='index').reset_index()
 df_stand.rename(columns={'index': 'Team'}, inplace=True)
 
 df_stand['Points'] = df_stand['Team'].map(overall_points)
-df_stand['Div_Points'] = df_stand['Team'].map(div_points)
+df_stand['Conf_Points'] = df_stand['Team'].map(conf_points)
 
 df_stand['Rating'] = (df_stand['Points'] / df_stand['GP'].replace(0, 1)).round(4)
-df_stand['Div_Rating'] = (df_stand['Div_Points'] / df_stand['Div_GP'].replace(0, 1)).round(4)
-df_stand['Div_WinPct'] = (df_stand['Div_W'] / df_stand['Div_GP'].replace(0, 1)).round(4)
-df_stand['Overall_WinPct'] = (df_stand['W'] / df_stand['GP'].replace(0, 1)).round(4)
+df_stand['Conf. Rating'] = (df_stand['Conf_Points'] / df_stand['Conf_GP'].replace(0, 1)).round(4)
+df_stand['Overall_WinPct'] = (df_stand['Wins'] / df_stand['GP'].replace(0, 1)).round(4)
 
 def get_h2h_bonus(row):
     t_name = row['Team']
@@ -237,68 +333,153 @@ df_stand['H2H_Bonus'] = df_stand.apply(get_h2h_bonus, axis=1)
 df_stand['Adjusted_Rating'] = (
     df_stand['Rating'] + 
     df_stand['H2H_Bonus'] + 
-    (df_stand['Div_Rating'] * 0.001) + 
+    (df_stand['Conf. Rating'] * 0.001) + 
     (df_stand['Overall_WinPct'] * 0.0001)
 )
 
 df_stand = df_stand.sort_values(by='Adjusted_Rating', ascending=False).reset_index(drop=True)
 
 # ---------------------------------------------------------
-# 5. Division Leaders & Playoff Seeding
+# 5. Conference Leaders & Playoff Seeding
 # ---------------------------------------------------------
-div_leaders = []
-for div_name in ['East', 'Central', 'West']:
-    top_team = df_stand[df_stand['Division'] == div_name].iloc[0]['Team']
-    div_leaders.append(top_team)
+conf_leaders = []
+for conf_name in ['East', 'Central', 'West']:
+    top_team = df_stand[df_stand['Conference'] == conf_name].iloc[0]['Team']
+    conf_leaders.append(top_team)
 
-df_stand['Is_Div_Leader'] = df_stand['Team'].isin(div_leaders)
+df_stand['Is_Conf_Leader'] = df_stand['Team'].isin(conf_leaders)
 
-leaders_df = df_stand[df_stand['Is_Div_Leader']].sort_values(by='Adjusted_Rating', ascending=False)
-remaining_df = df_stand[~df_stand['Is_Div_Leader']].sort_values(by='Adjusted_Rating', ascending=False)
+leaders_df = df_stand[df_stand['Is_Conf_Leader']].sort_values(by='Adjusted_Rating', ascending=False)
+remaining_df = df_stand[~df_stand['Is_Conf_Leader']].sort_values(by='Adjusted_Rating', ascending=False)
 
 seeding_df = pd.concat([leaders_df, remaining_df]).reset_index(drop=True)
 seeding_df['Seed'] = seeding_df.index + 1
 
 # ---------------------------------------------------------
-# 6. Streamlit User Interface
+# 6. Streamlit Main Interface & Tabs
 # ---------------------------------------------------------
-tab1, tab2 = st.tabs(["📊 Standings & Seeding", "🏆 Bracket Matchups"])
+tab_names = ["📋 Team Records", "📊 Standings & Seeding", "🏆 Bracket Matchups"]
+tab_records, tab_standings, tab_bracket = st.tabs(tab_names)
 
-display_cols = ['Seed', 'Team', 'Division', 'W', 'L', 'GP', 'Points', 'Rating', 'Div_W', 'Div_L', 'Div_Rating']
+# Force "Standings & Seeding" (Tab index 1) as initial view
+components.html(
+    f"""
+    <script>
+        window.addEventListener('load', function() {{
+            const tabs = window.parent.document.querySelectorAll('button[data-baseweb="tab"]');
+            if (tabs.length >= 2 && !window.parent.location.hash) {{
+                tabs[1].click();
+            }}
+        }});
+    </script>
+    """,
+    height=0, width=0
+)
 
-with tab1:
+# Column subsets for tables
+display_cols = ['Seed', 'Team', 'Conference', 'Wins', 'Losses', 'GP', 'Points', 'Rating', 'Conf. Wins', 'Conf. Losses', 'Conf. Rating']
+div_display_cols = ['Team', 'Wins', 'Losses', 'GP', 'Points', 'Rating', 'Conf. Wins', 'Conf. Losses', 'Conf. Rating']
+
+# ---------------------------------------------------------
+# TAB 1: TEAM RECORDS
+# ---------------------------------------------------------
+with tab_records:
+    st.subheader("Team Schedule & Results Breakdown")
+    
+    col_left, col_right = st.columns([1, 3])
+    
+    with col_left:
+        st.markdown("### Select Team")
+        selected_team = st.radio("Teams:", sorted(teams_list), label_visibility="collapsed")
+        
+    with col_right:
+        st.markdown(f"### {selected_team} Schedule ({TEAM_TO_CONF[selected_team]} Conference)")
+        
+        team_schedule = games_df[games_df['Team'] == selected_team].copy()
+        
+        display_schedule = []
+        for _, row in team_schedule.iterrows():
+            opp = row['Opponent']
+            week = row['Week']
+            is_bye = row['IsBye']
+            
+            if is_bye:
+                res_str = "BYE"
+            else:
+                pair = tuple(sorted([selected_team, opp])) if row['IsD1Opponent'] else None
+                sim_winner = simulated_outcomes.get((week, pair), None) if pair else None
+                
+                is_csv_completed = pd.notna(row['Result']) and row['Result'] in ['W', 'L']
+                
+                if sim_winner is not None:
+                    actual_csv_winner = selected_team if row['Result'] == 'W' else opp
+                    if not is_csv_completed or sim_winner != actual_csv_winner:
+                        res_str = "W (Sim)" if sim_winner == selected_team else "L (Sim)"
+                    else:
+                        res_str = row['Result']
+                elif is_csv_completed:
+                    res_str = row['Result']
+                else:
+                    res_str = "TBD"
+                
+            display_schedule.append({
+                'Week': week,
+                'Site': row['Location'],
+                'Opponent': opp,
+                'Conference Game': row['IsConf'],
+                'Result': res_str,
+                'PF': row['PF'],
+                'PA': row['PA']
+            })
+            
+        df_team_sched = pd.DataFrame(display_schedule)
+        st.dataframe(df_team_sched, use_container_width=True, hide_index=True)
+
+# ---------------------------------------------------------
+# TAB 2: STANDINGS & SEEDING (Default Landing View)
+# ---------------------------------------------------------
+with tab_standings:
     st.subheader("Official Projected Seeding (Top 13 Qualify)")
+    
+    st.markdown("#### 🏆 Conference Winners (#1 – #3 Seeds)")
     st.dataframe(
-        seeding_df[display_cols].head(13),
+        seeding_df[display_cols].head(3),
+        use_container_width=True,
+        hide_index=True
+    )
+    
+    st.markdown("#### 🏈 Remaining Qualifiers (#4 – #13 Seeds)")
+    st.dataframe(
+        seeding_df[display_cols].iloc[3:13],
         use_container_width=True,
         hide_index=True
     )
     
     st.markdown("---")
-    st.subheader("Conference Division Standings")
+    st.subheader("Conference Standings")
     
-    div_tab1, div_tab2, div_tab3 = st.tabs(["East Division", "Central Division", "West Division"])
+    conf_tab1, conf_tab2, conf_tab3 = st.tabs(["East Conference", "Central Conference", "West Conference"])
     
-    with div_tab1:
-        east_df = df_stand[df_stand['Division'] == 'East'].sort_values(by='Adjusted_Rating', ascending=False)
+    with conf_tab1:
+        east_df = df_stand[df_stand['Conference'] == 'East'].sort_values(by='Adjusted_Rating', ascending=False)
         st.dataframe(
-            east_df[['Team', 'W', 'L', 'GP', 'Points', 'Rating', 'Div_W', 'Div_L', 'Div_Rating']],
+            east_df[div_display_cols],
             use_container_width=True,
             hide_index=True
         )
         
-    with div_tab2:
-        central_df = df_stand[df_stand['Division'] == 'Central'].sort_values(by='Adjusted_Rating', ascending=False)
+    with conf_tab2:
+        central_df = df_stand[df_stand['Conference'] == 'Central'].sort_values(by='Adjusted_Rating', ascending=False)
         st.dataframe(
-            central_df[['Team', 'W', 'L', 'GP', 'Points', 'Rating', 'Div_W', 'Div_L', 'Div_Rating']],
+            central_df[div_display_cols],
             use_container_width=True,
             hide_index=True
         )
         
-    with div_tab3:
-        west_df = df_stand[df_stand['Division'] == 'West'].sort_values(by='Adjusted_Rating', ascending=False)
+    with conf_tab3:
+        west_df = df_stand[df_stand['Conference'] == 'West'].sort_values(by='Adjusted_Rating', ascending=False)
         st.dataframe(
-            west_df[['Team', 'W', 'L', 'GP', 'Points', 'Rating', 'Div_W', 'Div_L', 'Div_Rating']],
+            west_df[div_display_cols],
             use_container_width=True,
             hide_index=True
         )
@@ -306,16 +487,18 @@ with tab1:
     st.markdown("---")
     st.subheader("Full Division 1 Standings")
     st.dataframe(
-        df_stand[['Team', 'Division', 'W', 'L', 'GP', 'Points', 'Rating', 'Div_W', 'Div_L', 'Div_Rating']],
+        df_stand[['Team', 'Conference', 'Wins', 'Losses', 'GP', 'Points', 'Rating', 'Conf. Wins', 'Conf. Losses', 'Conf. Rating']],
         use_container_width=True,
         hide_index=True
     )
 
-with tab2:
+# ---------------------------------------------------------
+# TAB 3: BRACKET MATCHUPS
+# ---------------------------------------------------------
+with tab_bracket:
     st.subheader("NHIAA Division 1 Playoff Bracket Preview")
     playoff_13 = seeding_df.head(13).set_index('Seed')
 
-    # Generate Graphical HTML Bracket
     bracket_html = f"""
     <!DOCTYPE html>
     <html>
@@ -465,9 +648,9 @@ with tab2:
     
     with col_a:
         st.markdown("### 🌟 First Round Byes (#1 – #3 Seeds)")
-        st.info(f"**#1 Seed ({playoff_13.loc[1, 'Division']} Winner):** {playoff_13.loc[1, 'Team']} ({playoff_13.loc[1, 'Rating']} Rating)")
-        st.info(f"**#2 Seed ({playoff_13.loc[2, 'Division']} Winner):** {playoff_13.loc[2, 'Team']} ({playoff_13.loc[2, 'Rating']} Rating)")
-        st.info(f"**#3 Seed ({playoff_13.loc[3, 'Division']} Winner):** {playoff_13.loc[3, 'Team']} ({playoff_13.loc[3, 'Rating']} Rating)")
+        st.info(f"**#1 Seed ({playoff_13.loc[1, 'Conference']} Winner):** {playoff_13.loc[1, 'Team']} ({playoff_13.loc[1, 'Rating']} Rating)")
+        st.info(f"**#2 Seed ({playoff_13.loc[2, 'Conference']} Winner):** {playoff_13.loc[2, 'Team']} ({playoff_13.loc[2, 'Rating']} Rating)")
+        st.info(f"**#3 Seed ({playoff_13.loc[3, 'Conference']} Winner):** {playoff_13.loc[3, 'Team']} ({playoff_13.loc[3, 'Rating']} Rating)")
 
     with col_b:
         st.markdown("### ⚔️ Opening Round Matchups")
