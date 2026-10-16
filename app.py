@@ -7,17 +7,29 @@ import csv
 # Set Streamlit Page Configuration
 st.set_page_config(page_title="NHIAA D1 Playoff Simulator", layout="wide")
 
-# Custom CSS to force all dataframe table headers to be bold and centered
+# Custom CSS to force table headers to render bold & centered across Glide Data Grid + DOM
 st.markdown(
     """
     <style>
-    /* Target Streamlit dataframe header cells */
+    /* Glide Data Grid CSS variables for st.dataframe */
+    [data-testid="stDataFrame"] {
+        --gdg-header-font-weight: 800 !important;
+        --gdg-font-family: inherit;
+    }
+    
+    /* Fallback DOM targeting for standard tables */
     [data-testid="stDataFrame"] th, 
     [data-testid="stTable"] th,
-    div[data-testid="stDataFrame"] div[role="columnheader"] {
+    div[data-testid="stDataFrame"] div[role="columnheader"] span {
         text-align: center !important;
         font-weight: 800 !important;
         color: #FFFFFF !important;
+    }
+
+    /* Eliminated team row styling accent */
+    .eliminated-tag {
+        color: #ff4b4b;
+        font-weight: bold;
     }
     </style>
     """,
@@ -224,7 +236,7 @@ else:
             # Initialize default selectbox values
             if key not in st.session_state:
                 if sim_mode == "What-If Mode" and pd.notna(f['ActualResult']) and f['ActualResult'] in ['W', 'L']:
-                    actual_winner = team1 if f['ActualResult'] == 'W' else team2
+                    actual_winner = team1 if f['ActualResult'] == 'W' else f['Team2']
                     st.session_state[key] = f"{actual_winner} Win"
                 else:
                     st.session_state[key] = "Actual/TBD"
@@ -249,6 +261,7 @@ teams_list = list(TEAM_TO_CONF.keys())
 
 all_victories = {t: [] for t in teams_list}
 conf_victories = {t: [] for t in teams_list}
+remaining_games_count = {t: 0 for t in teams_list}
 
 standings_data = {
     t: {
@@ -293,6 +306,9 @@ for _, row in games_df[games_df['IsD1Opponent']].iterrows():
                 standings_data[t]['Losses'] += 1
                 if is_conf:
                     standings_data[t]['Conf. Losses'] += 1
+    else:
+        # Game is unplayed
+        remaining_games_count[t] += 1
 
 # Calculate Opponent-Value Rating Points (Base 10 + 2 per Opponent Win)
 win_counts = {t: standings_data[t]['Wins'] for t in teams_list}
@@ -356,7 +372,44 @@ seeding_df = pd.concat([leaders_df, remaining_df]).reset_index(drop=True)
 seeding_df['Seed'] = seeding_df.index + 1
 
 # ---------------------------------------------------------
-# 6. Streamlit Main Interface & Tabs
+# 6. Mathematical Elimination Calculation
+# ---------------------------------------------------------
+# Get 13th seed current rating threshold
+if len(seeding_df) >= 13:
+    cutoff_rating = seeding_df.iloc[12]['Rating']
+else:
+    cutoff_rating = 0.0
+
+eliminated_teams = set()
+
+for t in teams_list:
+    current_wins = standings_data[t]['Wins']
+    current_gp = standings_data[t]['GP']
+    rem_games = remaining_games_count[t]
+    
+    # Maximum possible games played and max wins assuming winning out
+    max_wins = current_wins + rem_games
+    total_scheduled_gp = current_gp + rem_games
+    
+    if total_scheduled_gp > 0:
+        # Max possible points assumes winning out + each defeated opponent winning max games (8 wins max)
+        max_opp_wins_bonus = len(all_victories[t]) * 16.0  # 2 pts * 8 max opp wins
+        max_possible_points = (max_wins * 10.0) + max_opp_wins_bonus
+        max_possible_rating = max_possible_points / total_scheduled_gp
+    else:
+        max_possible_rating = 0.0
+        
+    # Check if max possible rating is strictly lower than 13th seed rating AND seed > 13
+    current_seed = seeding_df[seeding_df['Team'] == t]['Seed'].values[0]
+    if current_seed > 13 and max_possible_rating < cutoff_rating:
+        eliminated_teams.add(t)
+
+# Add Playoff Status column to dataframes
+df_stand['Status'] = df_stand['Team'].apply(lambda x: '❌ Eliminated' if x in eliminated_teams else 'Active')
+seeding_df['Status'] = seeding_df['Team'].apply(lambda x: '❌ Eliminated' if x in eliminated_teams else ('In Play' if seeding_df[seeding_df['Team'] == x]['Seed'].values[0] <= 13 else 'Active'))
+
+# ---------------------------------------------------------
+# 7. Streamlit Main Interface & Tabs
 # ---------------------------------------------------------
 tab_names = ["📋 Team Records", "📊 Standings & Seeding", "🏆 Bracket Matchups"]
 tab_records, tab_standings, tab_bracket = st.tabs(tab_names)
@@ -377,8 +430,8 @@ components.html(
 )
 
 # Column subsets for tables
-display_cols = ['Seed', 'Team', 'Conference', 'Wins', 'Losses', 'GP', 'Points', 'Rating', 'Conf. Wins', 'Conf. Losses', 'Conf. Rating']
-div_display_cols = ['Team', 'Wins', 'Losses', 'GP', 'Points', 'Rating', 'Conf. Wins', 'Conf. Losses', 'Conf. Rating']
+display_cols = ['Seed', 'Status', 'Team', 'Conference', 'Wins', 'Losses', 'GP', 'Points', 'Rating', 'Conf. Wins', 'Conf. Losses', 'Conf. Rating']
+div_display_cols = ['Team', 'Status', 'Wins', 'Losses', 'GP', 'Points', 'Rating', 'Conf. Wins', 'Conf. Losses', 'Conf. Rating']
 
 # ---------------------------------------------------------
 # TAB 1: TEAM RECORDS
@@ -393,7 +446,9 @@ with tab_records:
         selected_team = st.radio("Teams:", sorted(teams_list), label_visibility="collapsed")
         
     with col_right:
-        st.markdown(f"### {selected_team} Schedule ({TEAM_TO_CONF[selected_team]} Conference)")
+        is_elim = selected_team in eliminated_teams
+        elim_badge = " — ❌ *Mathematically Eliminated*" if is_elim else ""
+        st.markdown(f"### {selected_team} Schedule ({TEAM_TO_CONF[selected_team]} Conference){elim_badge}")
         
         team_schedule = games_df[games_df['Team'] == selected_team].copy()
         
@@ -455,6 +510,14 @@ with tab_standings:
         hide_index=True
     )
     
+    if len(seeding_df) > 13:
+        st.markdown("#### 🚫 Non-Qualifiers (#14+ Seeds)")
+        st.dataframe(
+            seeding_df[display_cols].iloc[13:],
+            use_container_width=True,
+            hide_index=True
+        )
+    
     st.markdown("---")
     st.subheader("Conference Standings")
     
@@ -487,7 +550,7 @@ with tab_standings:
     st.markdown("---")
     st.subheader("Full Division 1 Standings")
     st.dataframe(
-        df_stand[['Team', 'Conference', 'Wins', 'Losses', 'GP', 'Points', 'Rating', 'Conf. Wins', 'Conf. Losses', 'Conf. Rating']],
+        df_stand[['Team', 'Status', 'Conference', 'Wins', 'Losses', 'GP', 'Points', 'Rating', 'Conf. Wins', 'Conf. Losses', 'Conf. Rating']],
         use_container_width=True,
         hide_index=True
     )
