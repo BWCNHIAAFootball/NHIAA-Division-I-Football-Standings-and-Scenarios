@@ -5,37 +5,37 @@ Week 3,at,Windham,Yes,L,6,-,28,0,
 Week 4,,Spaulding,No,W,17,-,7,2,14
 Week 5,at,Manchester Central,Yes,L,18,-,24,0,
 Week 6,at,Londonderry,Yes,L,0,-,47,0,
-Week 7,,Salem,Yes,,,-,,0,
+Week 7,,Salem,Yes,L,17,-,47,0,
 Week 8,at,Dover,No,,,-,,0,
 Week 9,,Pinkerton,Yes,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-0,0,,,6,2,,4,4,24
+0,0,,,7,2,,5,4,24
 ,,,,,,,,,
 Concord,,,,,,,,,
 Week 1,,Windham,Yes,L,31,-,28,0,
 Week 2,at,Alvirne,Yes,W,37,-,7,2,14
-Week 3,at,Salem,Yes,W,28,-,19,2,12
-Week 4,,Manchester Central,Yes,W,40,-,7,2,16
+Week 3,at,Salem,Yes,W,28,-,19,2,14
+Week 4,,Manchester Central,Yes,W,40,-,7,2,18
 Week 5,at,Pinkerton,Yes,L,14,-,37,0,
 Week 6,,Haverhill,#N/A,NCL,32,-,52,0,
-Week 7,at,Nashua North,No,,,-,,0,
+Week 7,at,Nashua North,No,W,21,-,14,2,16
 Week 8,at,Portsmouth-Oyster River,No,,,-,,0,
 Week 9,,Londonderry,Yes,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-42,8.4,,,5,3,,2,6,42
+46,9.2,,,6,4,,2,8,62
 ,,,,,,,,,
 Londonderry,,,,,,,,,
 Week 1,at,Timberlane,No,W,50,-,6,2,10
 Week 2,,Windham,Yes,W,14,-,0,2,20
-Week 3,at,Manchester Central,Yes,W,33,-,12,2,16
+Week 3,at,Manchester Central,Yes,W,33,-,12,2,18
 Week 4,,Pinkerton,Yes,L,27,-,14,0,
-Week 5,at,Salem,Yes,W,31,-,6,2,12
+Week 5,at,Salem,Yes,W,31,-,6,2,14
 Week 6,,Alvirne,Yes,W,47,-,0,2,14
-Week 7,,Central Catholic,#N/A,,,-,,0,
+Week 7,,Central Catholic,#N/A,NCW,28,-,27,0,
 Week 8,,Merrimack,No,,,-,,0,
 Week 9,at,Concord,Yes,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-62,12.4,,,6,5,,1,10,72
+66,13.2,,,6,5,,1,10,76
 ,,,,,,,,,
 Manchester Central,,,,,,,,,
 Week 1,,Spaulding,No,W,38,-,7,2,14
@@ -44,24 +44,24 @@ Week 3,,Londonderry,Yes,L,33,-,12,0,
 Week 4,at,Concord,Yes,L,0,-,40,0,
 Week 5,,Alvirne,Yes,W,18,-,24,2,14
 Week 6,at,Pinkerton,Yes,L,13,-,36,0,
-Week 7,at,Keene,No,,,-,,0,
+Week 7,at,Keene,No,W,34,-,13,2,10
 Week 8,at,Salem,Yes,,,-,,0,
 Week 9,,Windham,Yes,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-14,3.5,,,6,3,,3,6,40
+14,3.5,,,7,4,,3,8,50
 ,,,,,,,,,
 Pinkerton,,,,,,,,,
 Week 1,,Salem,Yes,L,7,-,28,0,
-Week 2,,Bedford,No,W,41,-,0,2,16
+Week 2,,Bedford,No,W,41,-,0,2,18
 Week 3,at,Manchester Memorial,No,W,35,-,12,2,16
 Week 4,at,Londonderry,Yes,W,27,-,14,2,20
-Week 5,,Concord,Yes,W,37,-,14,2,16
-Week 6,,Manchester Central,Yes,W,36,-,13,2,16
-Week 7,at,Andover,#N/A,,,-,,0,
+Week 5,,Concord,Yes,W,37,-,14,2,18
+Week 6,,Manchester Central,Yes,W,36,-,13,2,18
+Week 7,at,Andover,#N/A,NCL,29,-,36,0,
 Week 8,at,Windham,Yes,,,-,,0,
 Week 9,at,Alvirne,Yes,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-52,13,,,6,5,,1,10,84
+56,14,,,6,5,,1,10,90
 ,,,,,,,,,
 Salem,,,,,,,,,
 Week 1,at,Pinkerton,Yes,W,28,-,7,2,20
@@ -70,24 +70,24 @@ Week 3,,Concord,Yes,L,19,-,28,0,
 Week 4,at,Windham,Yes,L,7,-,21,0,
 Week 5,,Londonderry,Yes,L,6,-,31,0,
 Week 6,,Bishop Guertin,No,L,27,-,41,0,
-Week 7,at,Alvirne,Yes,,,-,,0,
+Week 7,at,Alvirne,Yes,W,47,-,17,2,14
 Week 8,,Manchester Central,Yes,,,-,,0,
 Week 9,at,Exeter,No,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-20,5,,,5,1,,4,2,20
+34,6.8,,,6,2,,4,4,34
 ,,,,,,,,,
 Windham,,,,,,,,,
-Week 1,at,Concord,Yes,W,31,-,28,2,16
+Week 1,at,Concord,Yes,W,31,-,28,2,18
 Week 2,at,Londonderry,Yes,L,0,-,14,0,
 Week 3,,Alvirne,Yes,W,28,-,6,2,14
-Week 4,,Salem,Yes,W,21,-,7,2,12
+Week 4,,Salem,Yes,W,21,-,7,2,14
 Week 5,at,Winnacunnet,No,W,21,-,0,2,20
-Week 6,,Merrimack,No,W,35,-,8,2,16
+Week 6,,Merrimack,No,W,35,-,8,2,18
 Week 7,,Nashua South,No,,,-,,0,
 Week 8,,Pinkerton,Yes,,,-,,0,
 Week 9,at,Manchester Central,Yes,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-42,10.5,,,6,5,,1,10,78
+46,11.5,,,6,5,,1,10,84
 ,,,,,,,,,
 Dover,,,,,,,,,
 Week 1,at,Noble,#N/A,NCL,22,-,30,0,
@@ -96,11 +96,11 @@ Week 3,,Winnacunnet,Yes,L,0,-,48,0,
 Week 4,,Keene,No,W,39,-,22,2,10
 Week 5,at,Timberlane,Yes,W,34,-,14,2,10
 Week 6,,Exeter,Yes,L,8,-,42,0,
-Week 7,,Portsmouth-Oyster River,Yes,,,-,,0,
+Week 7,,Portsmouth-Oyster River,Yes,L,0,-,49,0,
 Week 8,,Alvirne,No,,,-,,0,
 Week 9,at,Manchester Memorial,Yes,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-10,2.5,,,5,2,,3,4,20
+10,2,,,6,2,,4,4,20
 ,,,,,,,,,
 Exeter,,,,,,,,,
 Week 1,,Manchester Memorial,Yes,W,0,-,28,2,16
@@ -122,11 +122,11 @@ Week 3,,Pinkerton,No,L,12,-,35,0,
 Week 4,,Timberlane,Yes,W,39,-,14,2,10
 Week 5,at,Spaulding,Yes,W,35,-,14,2,14
 Week 6,,Winnacunnet,Yes,W,31,-,25,2,20
-Week 7,at,Bedford,No,,,-,,0,
+Week 7,at,Bedford,No,L,0,-,6,0,
 Week 8,,BYE,#N/A,,,-,,0,
 Week 9,,Dover,Yes,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-44,8.8,,,6,3,,3,6,44
+44,8.8,,,7,3,,4,6,44
 ,,,,,,,,,
 Portsmouth-Oyster River,,,,,,,,,
 Week 1,at,Winnacunnet,Yes,L,6,-,27,0,
@@ -135,11 +135,11 @@ Week 3,,Spaulding,Yes,W,38,-,7,2,14
 Week 4,at,Amesbury,#N/A,NCW,20,-,22,0,
 Week 5,at,Exeter,Yes,W,19,-,14,2,16
 Week 6,,Nashua North,No,W,28,-,21,2,16
-Week 7,at ,Dover,Yes,,,-,,0,
+Week 7,at ,Dover,Yes,W,49,-,0,2,14
 Week 8,,Concord,No,,,-,,0,
 Week 9,,Timberlane,Yes,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-46,11.5,,,5,4,,1,8,62
+60,12,,,6,5,,1,10,76
 ,,,,,,,,,
 Spaulding,,,,,,,,,
 Week 1,at,Manchester Central,No,L,7,-,38,0,
@@ -161,14 +161,14 @@ Week 3,,Exeter,Yes,L,7,-,42,0,
 Week 4,at,Manchester Memorial,Yes,L,14,-,39,0,
 Week 5,,Dover,Yes,L,14,-,34,0,
 Week 6,,Spaulding,Yes,L,0,-,14,0,
-Week 7,at,Merrimack,No,,,-,,0,
+Week 7,at,Merrimack,No,L,18,-,27,0,
 Week 8,,Goffstown,No,,,-,,0,
 Week 9,at,Portsmouth-Oyster River,Yes,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-0,0,,,6,0,,6,0,0
+0,0,,,7,0,,7,0,0
 ,,,,,,,,,
 Winnacunnet,,,,,,,,,
-Week 1,,Portsmouth-Oyster River,Yes,W,27,-,6,2,18
+Week 1,,Portsmouth-Oyster River,Yes,W,27,-,6,2,20
 Week 2,,Timberlane,Yes,W,62,-,0,2,10
 Week 3,at,Dover,Yes,W,48,-,0,2,14
 Week 4,,Exeter,Yes,W,13,-,3,2,16
@@ -178,7 +178,7 @@ Week 7,at,Spaulding,Yes,W,42,-,7,2,14
 Week 8,at,South Portland,#N/A,,,-,,0,
 Week 9,,Nashua South,No,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-72,12,,,7,5,,2,10,72
+74,12.33333333,,,7,5,,2,10,74
 ,,,,,,,,,
 Bedford,,,,,,,,,
 Week 1,,Nashua South,Yes,W,48,-,14,2,14
@@ -187,24 +187,24 @@ Week 3,at,Thornton,#N/A,NCL,7,-,49,0,
 Week 4,,Goffstown,Yes,W,41,-,10,2,12
 Week 5,at,Bishop Guertin,Yes,L,7,-,33,0,
 Week 6,at,Keene,Yes,W,42,-,14,2,10
-Week 7,,Manchester Memorial,No,,,-,,0,
+Week 7,,Manchester Memorial,No,W,6,-,0,2,16
 Week 8,,Nashua North,Yes,,,-,,0,
 Week 9,at,Merrimack,Yes,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-36,9,,,5,3,,2,6,36
+36,9,,,6,4,,2,8,52
 ,,,,,,,,,
 Bishop Guertin,,,,,,,,,
 Week 1,at,Nashua North,Yes,W,42,-,7,2,16
 Week 2,,Exeter,No,W,42,-,14,2,16
 Week 3,,Nashua South,Yes,W,58,-,17,2,14
-Week 4,at ,Merrimack,Yes,W,53,-,8,2,16
-Week 5,,Bedford,Yes,W,33,-,7,2,16
-Week 6,at,Salem,No,W,41,-,27,2,12
-Week 7,at,Goffstown,Yes,,,-,,0,
+Week 4,at ,Merrimack,Yes,W,53,-,8,2,18
+Week 5,,Bedford,Yes,W,33,-,7,2,18
+Week 6,at,Salem,No,W,41,-,27,2,14
+Week 7,at,Goffstown,Yes,W,54,-,7,2,12
 Week 8,,Westerly,#N/A,,,-,,0,
 Week 9,,Keene,Yes,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-62,15.5,,,6,6,,0,12,90
+78,15.6,,,7,7,,0,14,108
 ,,,,,,,,,
 Goffstown,,,,,,,,,
 Week 1,at,Merrimack,Yes,L,0,-,35,0,
@@ -213,11 +213,11 @@ Week 3,,Keene,Yes,W,7,-,6,2,10
 Week 4,at,Bedford,Yes,L,10,-,41,0,
 Week 5,,Nashua North,Yes,L,26,-,28,0,
 Week 6,,Nashua South,Yes,L,12,-,46,0,
-Week 7,,Bishop Guertin,Yes,,,-,,0,
+Week 7,,Bishop Guertin,Yes,L,7,-,54,0,
 Week 8,at,Timberlane,No,,,-,,0,
 Week 9,at,Spaulding,No,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-10,2,,,6,1,,5,2,10
+10,1.666666667,,,7,1,,6,2,10
 ,,,,,,,,,
 Keene,,,,,,,,,
 Week 1,,Alvirne,No,L,6,-,16,0,
@@ -226,11 +226,11 @@ Week 3,at,Goffstown,Yes,L,6,-,7,0,
 Week 4,at,Dover,No,L,22,-,39,0,
 Week 5,,Merrimack,Yes,L,20,-,28,0,
 Week 6,,Bedford,Yes,L,14,-,42,0,
-Week 7,,Manchester Central,No,,,-,,0,
+Week 7,,Manchester Central,No,L,13,-,34,0,
 Week 8,at,Nashua South,Yes,,,-,,0,
 Week 9,at,Bishop Guertin,Yes,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-0,0,,,6,0,,6,0,0
+0,0,,,7,0,,7,0,0
 ,,,,,,,,,
 Merrimack,,,,,,,,,
 Week 1,,Goffstown,Yes,W,35,-,0,2,12
@@ -239,24 +239,24 @@ Week 3,at,Nashua North,Yes,L,18,-,35,0,
 Week 4,,Bishop Guertin,Yes,L,8,-,53,0,
 Week 5,at,Keene,Yes,W,28,-,20,2,10
 Week 6,at,Windham,No,L,8,-,35,0,
-Week 7,,Timberlane,No,,,-,,0,
+Week 7,,Timberlane,No,W,27,-,18,2,10
 Week 8,at,Londonderry,No,,,-,,0,
 Week 9,,Bedford,Yes,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-36,7.2,,,6,3,,3,6,36
+36,7.2,,,7,4,,3,8,46
 ,,,,,,,,,
 Nashua North,,,,,,,,,
 Week 1,,Bishop Guertin,Yes,L,7,-,42,0,
 Week 2,at,Keene,Yes,W,36,-,0,2,10
-Week 3,,Merrimack,Yes,W,35,-,18,2,16
+Week 3,,Merrimack,Yes,W,35,-,18,2,18
 Week 4,at,Nashua South,Yes,L,34,-,39,0,
 Week 5,at,Goffstown,Yes,W,28,-,26,2,12
 Week 6,at,Portsmouth-Oyster River,No,L,21,-,28,0,
-Week 7,,Concord,No,,,-,,0,
+Week 7,,Concord,No,L,14,-,21,0,
 Week 8,at,Bedford,Yes,,,-,,0,
 Week 9,at,Dracut,#N/A,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-38,7.6,,,6,3,,3,6,38
+40,8,,,7,3,,4,6,40
 ,,,,,,,,,
 Nashua South,,,,,,,,,
 Week 1,at,Bedford,Yes,L,14,-,48,0,
