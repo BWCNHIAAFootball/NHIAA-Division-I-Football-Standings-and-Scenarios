@@ -1,3 +1,6 @@
+Ver 1.2 Deployed 10/18/26
+Change log: Updated to have markers showing teams that have clinched playoff spots, also conference championship. Predictor mode will simulate projector playoff clinching scenarios. 
+
 Ver 1.1 Deployed 10/15/26
 Change Log: Updated standings. Updated to include designators for teams mathematically eliminated from the playoffs. 
 
