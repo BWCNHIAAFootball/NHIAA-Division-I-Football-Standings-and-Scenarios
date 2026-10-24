@@ -26,7 +26,7 @@ Week 9,,Londonderry,Yes,,,-,,0,
 ,,,,,,,,,
 Londonderry,,,,,,,,,
 Week 1,at,Timberlane,No,W,50,-,6,2,10
-Week 2,,Windham,Yes,W,14,-,0,2,22
+Week 2,,Windham,Yes,W,14,-,0,2,24
 Week 3,at,Manchester Central,Yes,W,33,-,12,2,18
 Week 4,,Pinkerton,Yes,L,27,-,14,0,
 Week 5,at,Salem,Yes,W,31,-,6,2,16
@@ -35,7 +35,7 @@ Week 7,,Central Catholic,#N/A,NCW,28,-,27,0,
 Week 8,,Merrimack,No,W,23,-,6,2,18
 Week 9,at,Concord,Yes,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-72,14.4,,,7,6,,1,12,100
+74,14.8,,,7,6,,1,12,102
 ,,,,,,,,,
 Manchester Central,,,,,,,,,
 Week 1,,Spaulding,No,W,38,-,7,2,14
@@ -58,10 +58,10 @@ Week 4,at,Londonderry,Yes,W,27,-,14,2,22
 Week 5,,Concord,Yes,W,37,-,14,2,20
 Week 6,,Manchester Central,Yes,W,36,-,13,2,18
 Week 7,at,Andover,#N/A,NCL,29,-,36,0,
-Week 8,at,Windham,Yes,,,-,,0,
+Week 8,at,Windham,Yes,L,13,-,27,0,
 Week 9,at,Alvirne,Yes,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-60,15,,,6,5,,1,10,96
+60,12,,,7,5,,2,10,96
 ,,,,,,,,,
 Salem,,,,,,,,,
 Week 1,at,Pinkerton,Yes,W,28,-,7,2,20
@@ -84,10 +84,10 @@ Week 4,,Salem,Yes,W,21,-,7,2,16
 Week 5,at,Winnacunnet,No,W,21,-,0,2,20
 Week 6,,Merrimack,No,W,35,-,8,2,18
 Week 7,,Nashua South,No,W,38,-,0,2,16
-Week 8,,Pinkerton,Yes,,,-,,0,
+Week 8,,Pinkerton,Yes,W,27,-,13,2,20
 Week 9,at,Manchester Central,Yes,,,-,,0,
 ,,,,GP,W,,L,BP,PE
-52,13,,,7,6,,1,12,106
+72,14.4,,,8,7,,1,14,126
 ,,,,,,,,,
 Dover,,,,,,,,,
 Week 1,at,Noble,#N/A,NCL,22,-,30,0,
